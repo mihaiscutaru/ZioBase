@@ -1,15 +1,15 @@
 package io.scalac.labs.iot
 package api
 
-import application.ApplicationService
+import application.{ApplicationService, DummyData, PersistenceManager}
 import domain.error.DomainError
-
 import akka.actor.ActorSystem
 import akka.event.Logging._
 import akka.http.interop._
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.RouteResult.Complete
+import akka.http.scaladsl.server.{PathMatcher, Route}
 import zio._
 
 object Api {
@@ -20,7 +20,7 @@ object Api {
   val live: ZLayer[Has[HttpServer.Config] with Has[ActorSystem], Nothing, Api] = ZLayer.fromFunction(env =>
     new Service with JsonSupport with ZIOSupport {
 
-      def routes: Route = helloRoute
+      def routes: Route = helloRoute ~ categoryList ~ category
 
       implicit val domainErrorResponse: ErrorResponse[DomainError] = {
         case _ => HttpResponse(StatusCodes.InternalServerError)
@@ -37,7 +37,30 @@ object Api {
           }
         }
 
-//      implicit val domainErrorResponse: ErrorResponse[DomainError] = {
+      val categoryList: Route =
+      pathPrefix("categoryList") {
+        logRequestResult(("categoryList", InfoLevel)) {
+          pathEnd {
+            get {
+              complete(ApplicationService.ListCategories)
+            }
+          }
+        }
+      }
+
+      val category: Route =
+          path(pm = "category" / Segment) { category =>
+             logRequestResult("category", InfoLevel) {
+            pathEnd {
+              get {
+                complete(ApplicationService.ListCoursesForCategory(category))
+              }
+            }
+          }
+        }
+
+
+//      implicit val domai nErrorResponse: ErrorResponse[DomainError] = {
 //        case RepositoryError(_) => HttpResponse(StatusCodes.InternalServerError)
 //        case ValidationError(_) => HttpResponse(StatusCodes.BadRequest)
 //      }
