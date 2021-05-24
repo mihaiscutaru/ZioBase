@@ -1,10 +1,10 @@
 package io.scalac.labs.iot
 package application
 
-case class Category(name: String)
-case class Course(category: Category, name: String, rating: Int)
+import DataTypes._
 
 trait PersistenceManager {
+  def getUser(UUID: String): User
   def getCategories(): List[Category]
   def getCourses(category: Category): List[Course]
 }
@@ -32,10 +32,24 @@ object DummyData extends PersistenceManager {
           Course(category, "Android", 2)
         )
     }
+
+  override def getUser(UUID: String): User = {
+    val cat = Category("WebDevelopment")
+    val currentCourse = Course(cat, "React", 4)
+
+    val enrolled = List(Course(cat, "React", 4),
+      Course(cat, "Node.JS", 2),
+      Course(cat, "Scala", 5))
+
+    User(UUID, Student ,currentCourse, enrolled)
+  }
+
 }
 
 class dbConnector extends PersistenceManager {
-    override def getCategories(): List[Category] = ???
+  override def getCategories(): List[Category] = ???
 
   override def getCourses(category: Category): List[Course] = ???
+
+  override def getUser(UUID: String): User = ???
 }

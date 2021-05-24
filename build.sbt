@@ -38,7 +38,8 @@ val root = (project in file("."))
       "io.circe"                      %% "circe-derivation"                % "0.13.0-M4",
       "io.circe"                      %% "circe-generic"                   % "0.13.0",
       "io.circe"                      %% "circe-generic-extras"            % "0.13.0",
-      "dev.zio"                       %% "zio-test"                        % zioVersion  % Test
+      "dev.zio"                       %% "zio-test"                        % zioVersion  % Test,
+      "io.minio"                      % "minio"                            % "6.0.13"
     ),
     testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
   )

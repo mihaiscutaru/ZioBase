@@ -1,7 +1,7 @@
 package io.scalac.labs.iot
 package api
 
-import application.{ApplicationService, DummyData, PersistenceManager}
+import application.{ApplicationService, VideoStorageHandler}
 import domain.error.DomainError
 import akka.actor.ActorSystem
 import akka.event.Logging._
@@ -20,18 +20,19 @@ object Api {
   val live: ZLayer[Has[HttpServer.Config] with Has[ActorSystem], Nothing, Api] = ZLayer.fromFunction(env =>
     new Service with JsonSupport with ZIOSupport {
 
-      def routes: Route = helloRoute ~ categoryList ~ category
+      def routes: Route = login ~ categoryList ~ category ~ storage
 
       implicit val domainErrorResponse: ErrorResponse[DomainError] = {
         case _ => HttpResponse(StatusCodes.InternalServerError)
       }
 
-      val helloRoute: Route =
-        pathPrefix("hello") {
-          logRequestResult(("hello", InfoLevel)) {
+      val login : Route =
+        pathPrefix("login") {
+          logRequestResult(("login", InfoLevel)) {
             pathEnd {
               get {
-                complete(ApplicationService.hello)
+                val userUUId = JavaUUID.toString()
+                complete(ApplicationService.postLogin(userUUId))
               }
             }
           }
@@ -54,6 +55,17 @@ object Api {
             pathEnd {
               get {
                 complete(ApplicationService.ListCoursesForCategory(category))
+              }
+            }
+          }
+        }
+
+      val storage: Route =
+        path(pm = "storage") {
+          logRequestResult("category", InfoLevel) {
+            pathEnd {
+              get {
+                complete(VideoStorageHandler.listBuckets)
               }
             }
           }
