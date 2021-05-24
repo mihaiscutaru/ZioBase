@@ -21,6 +21,9 @@ object ApplicationService {
 
   def postLogin(uuid: String): UIO[String] = {
     UIO(pm.getUser(uuid).asJson.noSpaces)
+    //TODO populate user specific settings,
   }
+
+  def ListLecturesForCourse(courseName: String ) = ???
 
 }

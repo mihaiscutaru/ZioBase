@@ -20,7 +20,7 @@ object Api {
   val live: ZLayer[Has[HttpServer.Config] with Has[ActorSystem], Nothing, Api] = ZLayer.fromFunction(env =>
     new Service with JsonSupport with ZIOSupport {
 
-      def routes: Route = login ~ categoryList ~ category ~ storage
+      def routes: Route = login ~ categoryList ~ category ~ storage ~ course
 
       implicit val domainErrorResponse: ErrorResponse[DomainError] = {
         case _ => HttpResponse(StatusCodes.InternalServerError)
@@ -60,6 +60,20 @@ object Api {
           }
         }
 
+      val course: Route =
+        path(pm = "course" / Segment) { courseName =>
+          logRequestResult("category", InfoLevel) {
+            pathEnd {
+              get {
+                complete(ApplicationService.ListLecturesForCourse(courseName))
+              }
+            }
+          }
+        }
+
+
+
+      //TODO remove test route for Minio Tests
       val storage: Route =
         path(pm = "storage") {
           logRequestResult("category", InfoLevel) {
